@@ -1,0 +1,11 @@
+{
+  "name": "image-converter",
+  "version": "1.0.0",
+  "description": "Simple drag-and-drop image converter (PNG/JPG) with compression",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "MIT"
+}

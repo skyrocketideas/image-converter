@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Image Converter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Drag & Drop Image Converter</h1>
+
+    <div id="drop-area" class="drop-area">
+      <p>Drop PNG or JPG here, or <label for="fileElem" class="file-label">browse</label></p>
+      <input type="file" id="fileElem" accept="image/*" />
+      <div id="preview" class="preview"></div>
+    </div>
+
+    <div class="controls">
+      <label>Output format:
+        <select id="format-select">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+        </select>
+      </label>
+
+      <label>Quality: <span id="quality-label">90</span>%
+        <input type="range" id="quality" min="10" max="100" value="90">
+      </label>
+
+      <button id="convert" class="btn">Convert & Compress</button>
+      <a id="download-link" class="btn disabled" download>Download</a>
+    </div>
+
+    <p class="note">Note: PNG output ignores quality in most browsers; quality affects JPEG compression.</p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
