@@ -8,32 +8,59 @@
 </head>
 <body>
   <main class="container">
-    <h1>Drag & Drop Image Converter</h1>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Image tools</p>
+        <h1>Drag, convert, and shrink images with calm precision.</h1>
+      </div>
+      <p class="hero-copy">Batch convert PNG and JPG files, preview output size, and export with a cleaner, simpler workflow.</p>
+    </header>
 
-    <div id="drop-area" class="drop-area">
+    <section id="drop-area" class="drop-area">
       <p>Drop PNG or JPG files here, or <label for="fileElem" class="file-label">browse</label></p>
       <input type="file" id="fileElem" accept="image/*" multiple />
       <div id="preview" class="preview"></div>
-    </div>
+    </section>
 
-    <div class="controls">
-      <label>Output format:
-        <select id="format-select">
-          <option value="image/jpeg">JPG</option>
-          <option value="image/png">PNG</option>
-        </select>
-      </label>
+    <section class="controls-panel">
+      <div class="controls">
+        <label>Output format:
+          <select id="format-select">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/png">PNG</option>
+          </select>
+        </label>
 
-      <label>Quality: <span id="quality-label">90</span>%
-        <input type="range" id="quality" min="10" max="100" value="90">
-      </label>
+        <label>Mode:
+          <select id="mode-select">
+            <option value="quality">By quality</option>
+            <option value="target-size">By target size</option>
+          </select>
+        </label>
 
-      <button id="convert" class="btn">Convert & Compress</button>
-    </div>
+        <label id="quality-control">Quality: <span id="quality-label">90</span>%
+          <input type="range" id="quality" min="10" max="100" value="90">
+        </label>
 
-    <div id="downloads" class="downloads"></div>
+        <label id="target-size-control" class="hidden">Target size:
+          <input type="number" id="target-size" min="10" value="200" step="10">
+          <span>KB</span>
+        </label>
 
-    <p class="note">Note: PNG output ignores quality in most browsers; quality affects JPEG compression.</p>
+        <button id="convert" class="btn">Convert & Compress</button>
+      </div>
+
+      <div class="size-panel">
+        <h2>Output size</h2>
+        <div id="size-summary" class="size-summary">
+          <p class="size-placeholder">Choose images and adjust quality to preview output size.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="downloads" class="downloads"></section>
+
+    <p class="note">PNG export uses a lighter color palette to reduce file size while keeping the image dimensions the same.</p>
   </main>
 
   <script src="script.js"></script>
