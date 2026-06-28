@@ -11,6 +11,7 @@ const targetSizeInput = document.getElementById('target-size');
 const convertBtn = document.getElementById('convert');
 const downloads = document.getElementById('downloads');
 const sizeSummary = document.getElementById('size-summary');
+const faviconLink = document.getElementById('favicon-link');
 
 let currentFiles = [];
 let currentImages = [];
@@ -78,6 +79,10 @@ function handleFiles(files){
       img.onload = ()=>{
         currentImages.push(img);
         addPreview(img, file.name);
+        // if first file, set favicon
+        if(currentImages.length === 1){
+          setFaviconFromImage(img);
+        }
         if(currentImages.length === imageFiles.length){
           updateModeUI();
           updateSizePreview();
@@ -98,6 +103,32 @@ function handleFiles(files){
     };
     reader.readAsDataURL(file);
   });
+}
+
+function setFaviconFromImage(img){
+  const canvas = document.createElement('canvas');
+  const size = 32;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  // Preserve pixel colors for small icons: disable image smoothing and draw with explicit source/dest sizes
+  ctx.imageSmoothingEnabled = false;
+  const sw = img.naturalWidth || img.width;
+  const sh = img.naturalHeight || img.height;
+  ctx.clearRect(0, 0, size, size);
+  ctx.drawImage(img, 0, 0, sw, sh, 0, 0, size, size);
+  canvas.toBlob((blob)=>{
+    if(!blob) return;
+    const url = URL.createObjectURL(blob);
+    if(faviconLink){
+      faviconLink.href = url;
+    } else {
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = url;
+      document.head.appendChild(link);
+    }
+  }, 'image/png');
 }
 
 function addPreview(img, filename){
