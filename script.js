@@ -5,10 +5,10 @@ const formatSelect = document.getElementById('format-select');
 const qualitySlider = document.getElementById('quality');
 const qualityLabel = document.getElementById('quality-label');
 const convertBtn = document.getElementById('convert');
-const downloadLink = document.getElementById('download-link');
+const downloads = document.getElementById('downloads');
 
-let currentFile = null;
-let currentImage = null;
+let currentFiles = [];
+let currentImages = [];
 
 ['dragenter','dragover','dragleave','drop'].forEach(evt => {
   dropArea.addEventListener(evt, (e)=> e.preventDefault());
@@ -19,48 +19,68 @@ dropArea.addEventListener('dragleave', ()=> dropArea.classList.remove('dragover'
 dropArea.addEventListener('drop', (e)=>{
   dropArea.classList.remove('dragover');
   const items = e.dataTransfer.files;
-  if(items && items.length) handleFile(items[0]);
+  if(items && items.length) handleFiles(Array.from(items));
 });
 
 fileElem.addEventListener('change', (e)=>{
-  if(e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+  if(e.target.files && e.target.files.length) handleFiles(Array.from(e.target.files));
 });
 
 qualitySlider.addEventListener('input', ()=> qualityLabel.textContent = qualitySlider.value);
 
 convertBtn.addEventListener('click', ()=> {
-  if(!currentFile || !currentImage) return;
-  convertImage(currentImage, formatSelect.value, parseInt(qualitySlider.value,10));
+  if(!currentImages.length) return;
+  downloads.innerHTML = '';
+  currentImages.forEach((image, index) => {
+    convertImage(image, currentFiles[index].name, formatSelect.value, parseInt(qualitySlider.value,10));
+  });
 });
 
-function handleFile(file){
-  if(!file.type.startsWith('image/')){
-    alert('Please provide an image file (PNG or JPG).');
+function handleFiles(files){
+  const imageFiles = files.filter(file => file.type.startsWith('image/'));
+  if(!imageFiles.length){
+    alert('Please provide image files (PNG or JPG).');
     return;
   }
-  currentFile = file;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    const img = new Image();
-    img.onload = ()=>{
-      currentImage = img;
-      showPreview(img);
-      // auto-convert using current settings
-      convertImage(img, formatSelect.value, parseInt(qualitySlider.value,10));
-    };
-    img.src = reader.result;
-  };
-  reader.readAsDataURL(file);
-}
 
-function showPreview(img){
+  currentFiles = imageFiles;
+  currentImages = [];
   preview.innerHTML = '';
-  const thumb = document.createElement('img');
-  thumb.src = img.src;
-  preview.appendChild(thumb);
+  downloads.innerHTML = '';
+
+  imageFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        currentImages.push(img);
+        addPreview(img, file.name);
+        if(currentImages.length === imageFiles.length){
+          // auto-convert when all files are loaded
+          currentImages.forEach((image, index) => {
+            convertImage(image, imageFiles[index].name, formatSelect.value, parseInt(qualitySlider.value,10));
+          });
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
-function convertImage(img, mimeType, qualityPercent){
+function addPreview(img, filename){
+  const item = document.createElement('div');
+  item.className = 'preview-item';
+  const thumb = document.createElement('img');
+  const label = document.createElement('span');
+  thumb.src = img.src;
+  label.textContent = filename;
+  item.appendChild(thumb);
+  item.appendChild(label);
+  preview.appendChild(item);
+}
+
+function convertImage(img, originalName, mimeType, qualityPercent){
   const canvas = document.createElement('canvas');
   canvas.width = img.naturalWidth;
   canvas.height = img.naturalHeight;
@@ -68,25 +88,25 @@ function convertImage(img, mimeType, qualityPercent){
   ctx.drawImage(img, 0, 0);
 
   const quality = Math.max(0.01, Math.min(1, qualityPercent / 100));
+  const extension = mimeType === 'image/png' ? 'png' : 'jpg';
+  const filename = originalName.replace(/\.[^.]+$/, '') + '.' + extension;
 
-  // Use toBlob for better memory handling
+  const callback = (blob) => {
+    if(!blob) return alert('Conversion failed');
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.className = 'btn download-item';
+    link.textContent = `Download ${filename} (${formatBytes(blob.size)})`;
+    downloads.appendChild(link);
+  };
+
   if(mimeType === 'image/png'){
-    canvas.toBlob((blob)=> handleBlob(blob, 'converted.png'), 'image/png');
-  } else if(mimeType === 'image/jpeg'){
-    canvas.toBlob((blob)=> handleBlob(blob, 'converted.jpg'), 'image/jpeg', quality);
+    canvas.toBlob((blob)=> callback(blob), 'image/png');
   } else {
-    // fallback to jpeg
-    canvas.toBlob((blob)=> handleBlob(blob, 'converted.jpg'), 'image/jpeg', quality);
+    canvas.toBlob((blob)=> callback(blob), 'image/jpeg', quality);
   }
-}
-
-function handleBlob(blob, filename){
-  if(!blob) return alert('Conversion failed');
-  const url = URL.createObjectURL(blob);
-  downloadLink.href = url;
-  downloadLink.download = filename;
-  downloadLink.classList.remove('disabled');
-  downloadLink.textContent = `Download (${formatBytes(blob.size)})`;
 }
 
 function formatBytes(bytes){

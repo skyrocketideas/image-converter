@@ -11,8 +11,8 @@
     <h1>Drag & Drop Image Converter</h1>
 
     <div id="drop-area" class="drop-area">
-      <p>Drop PNG or JPG here, or <label for="fileElem" class="file-label">browse</label></p>
-      <input type="file" id="fileElem" accept="image/*" />
+      <p>Drop PNG or JPG files here, or <label for="fileElem" class="file-label">browse</label></p>
+      <input type="file" id="fileElem" accept="image/*" multiple />
       <div id="preview" class="preview"></div>
     </div>
 
@@ -29,8 +29,9 @@
       </label>
 
       <button id="convert" class="btn">Convert & Compress</button>
-      <a id="download-link" class="btn disabled" download>Download</a>
     </div>
+
+    <div id="downloads" class="downloads"></div>
 
     <p class="note">Note: PNG output ignores quality in most browsers; quality affects JPEG compression.</p>
   </main>
